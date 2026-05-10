@@ -1,125 +1,91 @@
-# Toonie: AI-Powered 2D Animator & Video Composer
+# Toonie
 
-Toonie is an interactive platform that lets users create, preview, and compose generative p5.js animations using natural language prompts and AI assistance. Users can chat with the AI, generate code, record animation clips, and assemble them into a timeline for export as a single video.
+Toonie is a web platform where you describe an animation in plain English and it generates the actual p5.js code and shows you a live preview instantly. You can record those animation previews as clips, arrange them on a timeline, and export them all as a single video. It's basically a creative tool that sits between a text editor and a video editor, powered by AI.
 
----
 
-## Features
+## 🛠️ Technologies
 
-- **Prompt-to-Animation:** Enter a description; the AI generates p5.js code and a live preview.
-- **Contextual Chat:** Ask questions about p5.js, animation, or coding; get relevant answers.
-- **Clip Recording:** Save animated segments as reusable video clips.
-- **Video Editor:** Arrange clips on a timeline, drag & drop, and export a composite animation.
-- **Code Transparency:** View, edit, and download all generated code.
+- React + Vite (Frontend)
+- NestJS (Backend)
+- p5.js (Animation engine)
+- OpenRouter API (LLM for code generation)
+- TypeScript
+- CSS
 
----
 
-## Project Structure
 
-```
-repo/
-├── Frontend/   # React + Vite client app
-├── Backend/    # NestJS API server
-```
+## ✨ Features
 
----
+- You type a prompt like "make a bouncing ball that changes color" and the AI generates the p5.js code and runs it live on screen
+- You can chat with the AI to ask questions about animations or request changes to what's already generated
+- The generated code is fully visible — you can edit it yourself too, not just rely on the AI
+- Record any running animation as a video clip and save it
+- A timeline-based video editor where you can drag, drop, and reorder all your saved clips
+- Export the final assembled timeline as one single video file
+- Non-animation queries are filtered out so the AI stays on topic
 
-## Setup Instructions
 
-### Prerequisites
 
-- Node.js (v18+ recommended)
-- npm or yarn
+## 🎬 The Loop Is Closed — And That Changes Everything
 
-### 1. Clone the Repository
+The fact that the AI doesn't just return code — it returns *runnable* code that immediately previews in the browser. Most AI code tools give you code and then you have to go somewhere else to run it. Here, the loop is closed. You prompt, you see it move, you record it. That's a genuinely different experience.
 
-```sh
-git clone <your-repo-url>
-cd repo
-```
 
-### 2. Install Dependencies
 
-#### Frontend
+## 🔧 Process
 
-```sh
+I started by figuring out the core loop — prompt in, animation out. The frontend needed to send a user's text to the backend, get p5.js code back, and then render that code live in a canvas element without refreshing the page. That part took some thinking because dynamically executing p5.js in a React app isn't as straightforward as just dumping code into a script tag.
+
+Once the generation and preview were working, I built the chat layer on top of it. The AI needed context about what it had already generated so it could make adjustments when you asked for changes. The backend handled conversation history to keep the context alive across messages.
+
+After the core was solid, I added clip recording using the browser's MediaRecorder API. Users can hit record while the animation is running and it saves that segment as a downloadable clip. This was honestly one of the more finicky parts — getting the canvas stream into a proper video format took some trial and error.
+
+Finally, I built the video editor — a timeline where you can drop all your clips, reorder them, and export them as one merged video. This tied everything together and made the tool feel complete rather than just a code generator.
+
+
+
+## 📚 What I Learned
+
+- **Dynamic code execution in the browser** — how to safely evaluate and run p5.js sketch code inside a React component without blowing up the app
+- **MediaRecorder API** — how to capture a canvas stream, record it in chunks, and assemble those chunks into a downloadable video blob
+- **NestJS basics** — this was my first real exposure to it; setting up modules, controllers, and services felt very different from Express
+- **Managing AI context** — how to pass conversation history back and forth so the AI remembers what it generated and can build on it
+- **Timeline UI logic** — handling drag-and-drop ordering on a custom video editor without a library
+
+
+
+## 🌱 Overall Growth
+
+This project pushed me into territory I hadn't been in before — real-time canvas manipulation, browser-native video recording, and building a product that actually feels creative and fun to use. It made me think about AI tools differently: not just "what can the AI do" but "what does the full loop around the AI look like for the user."
+
+
+
+## 🚀 Running the Project
+```bash
+git clone https://github.com/SarthakKala/Toonie.git
+cd Toonie
+
 cd Frontend
 npm install
-```
+# Create Frontend/.env with:
+# FRONTEND_URL=http://localhost:5173
+# BACKEND_URL=http://localhost:3000
+npm run dev
 
-#### Backend
-
-```sh
-cd ../Backend
+# In a separate terminal:
+cd ../backend
 npm install
-```
-
-### 3. Configure Environment Variables
-
-Create `.env` files in both `Frontend/` and `Backend/` directories.  
-You can use the following dummy templates:
-
-#### Frontend/.env.example
-
-```
-FRONTEND_URL="http://localhost:5173"
-BACKEND_URL="http://localhost:3000"
-```
-
-#### Backend/.env.example
-
-```
-PORT=3000
-FRONTEND_URL="http://localhost:5173"
-
-OPENROUTER_API_KEY="your-openrouter-api-key-here"
-```
-
-Copy these files to `.env` and fill in any required secrets (such as your OpenRouter API key for LLM access).
-
-### 4. Run the Project
-
-#### Start Backend
-
-```sh
-cd Backend
+# Create backend/.env with:
+# PORT=3000
+# FRONTEND_URL=http://localhost:5173
+# OPENROUTER_API_KEY=your_key_here
 npm run start:dev
 ```
 
-#### Start Frontend
-
-```sh
-cd ../Frontend
-npm run dev
-```
-
-- Frontend will run on [http://localhost:5173](http://localhost:5173)
-- Backend will run on [http://localhost:3000](http://localhost:3000)
-
+<!--
 ---
 
-## How the Project Functions
+## 🎥 Video
+-->
 
-1. **Landing Page:**  
-   Users enter a prompt or use `/animate` to request an animation. The AI backend generates p5.js code, which is displayed and previewed.
-
-2. **Dashboard:**  
-   After code generation, users access the dashboard to view, edit, and run code. The live preview shows the animation in real time.
-
-3. **Chat & Context:**  
-   Users can chat with the AI for help or new animations. Non-relevant queries are filtered with friendly error messages.
-
-4. **Clip Recording:**  
-   Users record the animation preview as video clips, which are saved locally.
-
-5. **Video Editor:**  
-   Saved clips can be added to a timeline, reordered, and exported as a single composite animation.
-
-6. **Export:**  
-   The final video can be downloaded for sharing or further editing.
-
----
-
-## Contributing
-
-Pull requests and suggestions are welcome! Please open issues for bugs or feature requests.
+<!-- Attach your demo video here -->
