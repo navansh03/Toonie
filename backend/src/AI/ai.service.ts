@@ -39,7 +39,7 @@ export class AIService {
   private readonly logger = new Logger(AIService.name);
   private client!: AxiosInstance;
   /** Must match an id from https://openrouter.ai/docs (invalid ids return 404 from OpenRouter). */
-  private defaultModel: string = 'qwen/qwen3-coder:free';
+  private defaultModel: string = 'openai/gpt-oss-120b:free';
 
   constructor(private configService: ConfigService) {
     this.initializeClient();
@@ -113,12 +113,17 @@ export class AIService {
       };
 
     } catch (error) {
-      console.error('AI Service Error:', error);
-      
       if (axios.isAxiosError(error)) {
         const statusCode = error.response?.status;
         const errorData = error.response?.data;
-        
+        const upstreamMessage = errorData?.error?.message || errorData?.error || errorData;
+
+        console.error(
+          `AI Service Error: status=${statusCode} upstream=${
+            typeof upstreamMessage === 'string' ? upstreamMessage : JSON.stringify(upstreamMessage)
+          }`,
+        );
+
         if (statusCode === 401) {
           throw new HttpException(
             'Invalid API key. Please check your OpenRouter configuration.',
@@ -126,7 +131,9 @@ export class AIService {
           );
         } else if (statusCode === 429) {
           throw new HttpException(
-            'Rate limit exceeded. Please try again later.',
+            `Rate limit exceeded: ${
+              typeof upstreamMessage === 'string' ? upstreamMessage : 'free-tier quota likely reached'
+            }`,
             HttpStatus.TOO_MANY_REQUESTS
           );
         } else if (statusCode === 400) {
@@ -135,6 +142,8 @@ export class AIService {
             HttpStatus.BAD_REQUEST
           );
         }
+      } else {
+        console.error('AI Service Error:', error);
       }
 
       throw new HttpException(
